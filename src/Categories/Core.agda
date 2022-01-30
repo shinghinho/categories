@@ -1,6 +1,9 @@
+{-# OPTIONS --without-K --safe #-}
+
 module Categories.Core where
 
 open import Level renaming (suc to lsuc)
+open import Relation.Binary
 
 -- Compute the universe level of a category
 CatLevel : (𝓁ob 𝓁mor 𝓁eq : Level) → Level
@@ -10,19 +13,20 @@ CatLevel 𝓁ob 𝓁mor 𝓁eq = lsuc (𝓁ob ⊔ 𝓁mor ⊔ 𝓁eq)
 CatUni : (𝓁ob 𝓁mor 𝓁eq :  Level) → Set (lsuc (CatLevel 𝓁ob 𝓁mor 𝓁eq))
 CatUni 𝓁ob 𝓁mor 𝓁eq = Set (CatLevel 𝓁ob 𝓁mor 𝓁eq)
 
--- A category is a class of object, a class of morphisms and an equivalence
 record Category {𝓁ob 𝓁mor 𝓁eq : Level} : CatUni 𝓁ob 𝓁mor 𝓁eq where
-  -- language
+  -- precedence
   infixl 20 _∘_
   infixl 10 _≃_
   -- data
   field
-    ob  : Set 𝓁ob
-    hom : ob → ob → Set 𝓁mor
-    _≃_ : {a b : ob} → hom a b → hom a b → Set 𝓁eq
-    id  : {a : ob} → hom a a
-    _∘_ : {a b c : ob} → hom b c → hom a b → hom a c
-  -- TODO: _≃_ must be an equivalence relation
+    ob  : Set 𝓁ob -- class of objects
+    hom : ob → ob → Set 𝓁mor -- hom functor
+    _≃_ : {a b : ob} → hom a b → hom a b → Set 𝓁eq -- equivalence
+    id  : {a : ob} → hom a a -- identity arrow
+    _∘_ : {a b c : ob} → hom b c → hom a b → hom a c -- composition
+  -- higher witness is an equivalence
+  field
+    ≃-isequiv : {a b : ob} → IsEquivalence {A = hom a b} _≃_
   -- categorical axioms
   field
     -- id is left unital element
@@ -36,9 +40,10 @@ record Category {𝓁ob 𝓁mor 𝓁eq : Level} : CatUni 𝓁ob 𝓁mor 𝓁eq w
        → (h ∘ g) ∘ f ≃ h ∘ (g ∘ f)
 open Category
 
-variable
-  𝓁ob 𝓁mor 𝓁eq : Level
-  ℂ 𝔻 𝔼 : Category {𝓁ob} {𝓁mor} {𝓁eq}
+private
+  variable
+    𝓁ob 𝓁mor 𝓁eq : Level
+    ℂ : Category {𝓁ob} {𝓁mor} {𝓁eq}
 
 dom : {a b : ob ℂ} → hom ℂ a b → ob ℂ
 dom {a = a} _ = a
