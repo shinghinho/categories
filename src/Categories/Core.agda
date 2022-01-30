@@ -6,40 +6,28 @@ open import Level
 open import Relation.Binary
 
 record Category {𝓁ob 𝓁mor 𝓁eq : Level} : Set (suc (𝓁ob ⊔ 𝓁mor ⊔ 𝓁eq)) where
-  -- precedence
-  infixl 20 _∘_
-  infixl 10 _≃_
   -- data
   field
-    ob  : Set 𝓁ob -- class of objects
-    hom : ob → ob → Set 𝓁mor -- hom functor
-    _≃_ : {a b : ob} → hom a b → hom a b → Set 𝓁eq -- equivalence
-    id  : {a : ob} → hom a a -- identity arrow
-    _∘_ : {a b c : ob} → hom b c → hom a b → hom a c -- composition
+    ob    : Set 𝓁ob
+    arr   : ob → ob → Set 𝓁mor
+    equiv : {a b : ob} → arr a b → arr a b → Set 𝓁eq
+    ident : {a : ob} → arr a a
+    comp  : {a b c : ob} → arr b c → arr a b → arr a c
   -- higher witness is an equivalence
   field
-    ≃-isequiv : {a b : ob} → IsEquivalence {A = hom a b} _≃_
-    -- missing: ≃ ∘
+    isequiv : {a b : ob} → IsEquivalence {A = arr a b} equiv
+    erc : {a b c : ob} {f p : arr a b} {g q : arr b c}
+        → equiv f p
+        → equiv g q
+        → equiv (comp g f) (comp q p)
   -- categorical axioms
   field
     -- id is left unital element
-    1li : {a b : ob} {f : hom a b} 
-        → id ∘ f ≃ f
+    1li : {a b : ob} {f : arr a b} → equiv (comp ident f) f
     -- id is the right unital element
-    1ri : {a b : ob} {f : hom a b} 
-        → f ∘ id ≃ f
+    1ri : {a b : ob} {f : arr a b} → equiv (comp f ident) f
     -- composition is associative
-    ca : {a b c d : ob} {f : hom a b} {g : hom b c} {h : hom c d} 
-       → (h ∘ g) ∘ f ≃ h ∘ (g ∘ f)
+    ca : {a b c d : ob} {f : arr a b} {g : arr b c} {h : arr c d} 
+       → equiv (comp (comp h g) f) (comp h (comp g f))
 open Category
 
-private
-  variable
-    𝓁ob 𝓁mor 𝓁eq : Level
-    ℂ : Category {𝓁ob} {𝓁mor} {𝓁eq}
-
-dom : {a b : ob ℂ} → hom ℂ a b → ob ℂ
-dom {a = a} _ = a
-
-cod : {a b : ob ℂ} → hom ℂ a b → ob ℂ
-cod {b = b} _ = b
