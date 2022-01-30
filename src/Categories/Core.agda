@@ -2,18 +2,10 @@
 
 module Categories.Core where
 
-open import Level renaming (suc to lsuc)
+open import Level
 open import Relation.Binary
 
--- Compute the universe level of a category
-CatLevel : (𝓁ob 𝓁mor 𝓁eq : Level) → Level
-CatLevel 𝓁ob 𝓁mor 𝓁eq = lsuc (𝓁ob ⊔ 𝓁mor ⊔ 𝓁eq)
-
--- Compute the type universe for the category
-CatUni : (𝓁ob 𝓁mor 𝓁eq :  Level) → Set (lsuc (CatLevel 𝓁ob 𝓁mor 𝓁eq))
-CatUni 𝓁ob 𝓁mor 𝓁eq = Set (CatLevel 𝓁ob 𝓁mor 𝓁eq)
-
-record Category {𝓁ob 𝓁mor 𝓁eq : Level} : CatUni 𝓁ob 𝓁mor 𝓁eq where
+record Category {𝓁ob 𝓁mor 𝓁eq : Level} : Set (suc (𝓁ob ⊔ 𝓁mor ⊔ 𝓁eq)) where
   -- precedence
   infixl 20 _∘_
   infixl 10 _≃_
@@ -27,6 +19,7 @@ record Category {𝓁ob 𝓁mor 𝓁eq : Level} : CatUni 𝓁ob 𝓁mor 𝓁eq w
   -- higher witness is an equivalence
   field
     ≃-isequiv : {a b : ob} → IsEquivalence {A = hom a b} _≃_
+    -- missing: ≃ ∘
   -- categorical axioms
   field
     -- id is left unital element
